@@ -1,0 +1,36 @@
+name: Check Rebel for Cybex AVI Jogging Stroller (Daily)
+
+on:
+  schedule:
+    # 1:00 PM ET = 18:00 UTC (accounts for EST; adjust to 17:00 for EDT if desired)
+    - cron: '0 18 * * *'
+  workflow_dispatch:   # Allow manual trigger from the Actions tab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Rebel Stroller Checker
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python main.py
+
+      - name: Upload debug HTML (always, for troubleshooting)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebel-debug-html
+          path: rebel_debug.html
+          retention-days: 3
